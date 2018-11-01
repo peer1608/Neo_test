@@ -25,7 +25,7 @@ Docker
 - Web Application will be monitored by Prometheus
 - Data will be retained even after the service restarts. This is achieved using Persistent Volumes & Persistent Volumes Claims option in kubernetes. Have used 'host path' as Persistent Volume.
 
-###Application Functionality
+### Application Functionality
 
 - Upload & store an image inside album
 - List names all available album(s) & images stored inside the album
