@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: album-manager-app
+  name: album-manager-svc
+spec:
+  type: NodePort
+  ports:
+    - port: 5001 # this Service's port (cluster-internal IP clusterIP)
+      targetPort: 5001 # pods expose this port
+      nodePort: 30001
+  selector: # exposes any pods with the following labels as a service
+    app: album-manager
