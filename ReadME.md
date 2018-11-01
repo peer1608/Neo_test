@@ -15,6 +15,7 @@ Data need to be available even after the service restarts
 ### Prerequisites
 
 Minikube 
+
 Docker
 
 ### Album manager application implementation
@@ -24,9 +25,9 @@ Docker
 - Web Application will be monitored by Prometheus
 - Data will be retained even after the service restarts. This is achieved using Persistent Volumes & Persistent Volumes Claims option in kubernetes. Have used 'host path' as Persistent Volume.
 
-####Application Functionality
+###Application Functionality
 
-- Uploading & store an image inside album
+- Upload & store an image inside album
 - List names all available album(s) & images stored inside the album
 - List names all images stored inside the given album
 - View an image inside the given album
@@ -34,8 +35,6 @@ Docker
 - View the list of events received by the application
 
 ### Deploying the application in Kubernetes
-
-Check out https://github.com/peer1608/Neo_test.git
 
 - Navigate to Neo_test folder
 	cd Neo_test
@@ -60,31 +59,30 @@ Check out https://github.com/peer1608/Neo_test.git
 
 ## Application usage
 
-- Find the Application IP & port from Kubernetes. http://<IPAddress>:<port>
-- Launch the application
+- Find the Application IP & port from Kubernetes to launch the application
 
 - Uploading & store an image inside album
-	- URL: http://<IPAddress>:<port>/api/v1/resources/upload
+	- URL: /api/v1/resources/upload
 	- Method: GET, POST
 	- Arguments: Album Name, Image file
 
 - List names all available album(s) & images stored inside the album
-	- URL: http://<IPAddress>:<port>/api/v1/resources/listalbum/all
+	- URL: /api/v1/resources/listalbum/all
 	- Method: GET
 
 - List names all images stored inside the given album
-	- URL: http://<IPAddress>:<port>/api/v1/resources/listalbum?albumName=<album_Name>
+	- URL: /api/v1/resources/listalbum?albumName=<album_Name>
 	- Method: GET
 
 - View an image inside the given album
-	- URL: http://<IPAddress>:<port>/api/v1/resources/view?imageName=<album_Name>:<image_Name>
+	- URL: /api/v1/resources/view?imageName=<album_Name>:<image_Name>
 	- Method: GET
 
 - Delete an image inside the given album
-	- URL: http://<IPAddress>:<port>/api/v1/resources/delete?imageName=<album_Name>:<image_Name>
+	- URL: /api/v1/resources/delete?imageName=<album_Name>:<image_Name>
 	- Method: GET
 
 - View the list of events received by the application
-	- URL: http://<IPAddress>:<port>/api/v1/resources/events
+	- URL: /api/v1/resources/events
 	- Method: GET
 		
