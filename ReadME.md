@@ -80,7 +80,7 @@ Docker
 
 - Delete an image inside the given album
 	- URL: /api/v1/resources/delete?imageName=<album_Name>:<image_Name>
-	- Method: GET
+	- Method: GET, POST
 
 - View the list of events received by the application
 	- URL: /api/v1/resources/events
