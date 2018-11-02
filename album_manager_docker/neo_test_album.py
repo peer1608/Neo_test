@@ -6,10 +6,9 @@ import threading
 from BaseHTTPServer import HTTPServer
 from prometheus_client import Summary, MetricsHandler, Counter, generate_latest
 import flask
-from flask import request, jsonify, send_from_directory, Response
+from flask import request, jsonify, Response, send_file
 import os
 import logging
-import traceback
 
 app = flask.Flask(__name__)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -43,7 +42,7 @@ def home():
             images_target = os.path.join(APP_ROOT, '{}'.format(folder_name))
             if not request.form['album_Name']:
                 message = [{"Exit Code": "500", "Content": "Album name not given"}]
-                return jsonify(message)
+                return jsonify(message), 500
             album_Name = request.form['album_Name']
             target = os.path.join(images_target + '/' + album_Name)
             print(target)
@@ -56,7 +55,7 @@ def home():
                 print(upload)
                 if not upload.filename:
                     message = [{"Exit Code": "500", "Content": "Image name not given"}]
-                    return jsonify(message)
+                    return jsonify(message), 500
                 print("{} is the file name".format(upload.filename))
                 filename = upload.filename
                 # This is to verify files are supported
@@ -65,7 +64,7 @@ def home():
                     print("File supported moving on...")
                 else:
                     message = [{"Exit Code": "500", "Content": "File not supported"}]
-                    return jsonify(message)
+                    return jsonify(message), 500
                 destination = "/".join([target, filename])
                 print("Accept incoming file:", filename)
                 print("Save it to:", destination)
@@ -75,7 +74,7 @@ def home():
     except Exception as e:
         print str(e)
         message = [{"Exit Code": "500", "Content": "Image file upload failed"}]
-        return jsonify(message)
+        return jsonify(message), 500
     return """
         <!doctype html>
         <title>Upload Image File</title>
@@ -108,7 +107,7 @@ def list_all():
     except Exception as e:
         print str(e)
         message=[{"Exit Code": "500","Content":"Album Name not given"}]
-        return jsonify(message)
+        return jsonify(message), 500
 
 # A route to return all of the available images from given album.
 @app.route('/api/v1/resources/listalbum', methods=['GET'])
@@ -135,10 +134,10 @@ def list_album():
             return jsonify(results)
         else:
             message = [{"Exit Code": "500", "Content": 'Album '+request.args['albumName']+' is not present'}]
-            return jsonify(message)
+            return jsonify(message), 500
     else:
         message = [{"Exit Code": "500", "Content": "Album Name not given"}]
-        return jsonify(message)
+        return jsonify(message), 500
 
 # A route to delete given images in given album.
 @app.route('/api/v1/resources/delete', methods=['GET','POST'])
@@ -149,36 +148,36 @@ def delete():
         albumName,image=request.args['imageName'].split(':')
         if not os.path.isdir(os.path.join(APP_ROOT, '{}/{}'.format(folder_name,albumName))):
             message = [{"Exit Code": "500", "Content": "Album is not present"}]
-            return jsonify(message)
+            return jsonify(message), 500
         if not os.path.exists(os.path.join(APP_ROOT, '{}/{}/{}'.format(folder_name,albumName,image))):
             message = [{"Exit Code": "500", "Content": "Image is not present"}]
-            return jsonify(message)
+            return jsonify(message), 500
         os.remove(os.path.join(APP_ROOT, '{}/{}/{}'.format(folder_name,albumName,image)))
         print 'deleted '+image+' from album '+albumName
         message = [{"Exit Code": "200", "Content": "Image deleted successfully"}]
         return jsonify(message)
     else:
         message = [{"Exit Code": "500", "Content": "Image Name not given"}]
-        return jsonify(message)
+        return jsonify(message), 500
 
 # A route to view given images in given album.
 @app.route('/api/v1/resources/view')
-@INDEX_TIME.time()
+#@INDEX_TIME.time()
 def send_image():
-    print request.method
     counter()
     if 'imageName' in request.args:
         albumName, image = request.args['imageName'].split(':')
         if not os.path.isdir(os.path.join(APP_ROOT, '{}/{}'.format(folder_name,albumName))):
             message = [{"Exit Code": "500", "Content": "Album is not present"}]
-            return jsonify(message)
+            return jsonify(message), 500
         if not os.path.exists(os.path.join(APP_ROOT, '{}/{}/{}'.format(folder_name,albumName,image))):
             message = [{"Exit Code": "500", "Content": "Image is not present"}]
-            return jsonify(message)
-        return send_from_directory("images", os.path.join('{}/{}'.format(albumName,image)))
+            return jsonify(message), 500
+        image_path= os.path.join('{}/{}/{}/{}'.format(os.getcwd(),folder_name,albumName,image))
+        return send_file(image_path, mimetype='image/jpg')
     else:
         message = [{"Exit Code": "500", "Content": "Image file not given"}]
-        return jsonify(message)
+        return jsonify(message), 500
 
 # A route to display events/requests handled.
 @app.route('/api/v1/resources/events')
@@ -197,35 +196,19 @@ def after_request(response):
     # since that 500 is already logged via @app.errorhandler.
     if 'view' in request.full_path:
         response_data='Displaying image'
-        print response_data
-    if 'events' not in request.full_path and 'view' not in request.full_path:
-        response_data = response.get_data()
-    if 'events' in request.full_path:
+    elif 'events' in request.full_path:
         response_data='Displaying events'
-    if response.status_code != 500:
-        ts = strftime('[%Y-%b-%d %H:%M]')
-        logger.error('\n%s \n %s %s %s %s %s \n%s',
-                      ts,
-                      request.remote_addr,
-                      request.method,
-                      request.scheme,
-                      request.full_path,
-                      response.status, response_data)
-    return response
-
-@app.errorhandler(Exception)
-def exceptions(e):
-    """ Logging after every Exception. """
+    else:
+        response_data = response.get_data()
     ts = strftime('[%Y-%b-%d %H:%M]')
-    tb = traceback.format_exc()
-    logger.error('%s %s %s %s %s 5xx INTERNAL SERVER ERROR\n%s',
+    logger.error('\n%s \n %s %s %s %s %s \n%s',
                   ts,
                   request.remote_addr,
                   request.method,
                   request.scheme,
                   request.full_path,
-                  tb)
-    return "Internal Server Error", 500
+                  response.status, response_data)
+    return response
 
 @app.route('/metrics')
 def metrics():
