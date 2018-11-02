@@ -162,7 +162,7 @@ def delete():
 
 # A route to view given images in given album.
 @app.route('/api/v1/resources/view')
-#@INDEX_TIME.time()
+@INDEX_TIME.time()
 def send_image():
     counter()
     if 'imageName' in request.args:
