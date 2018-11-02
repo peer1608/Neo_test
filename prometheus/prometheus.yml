@@ -11,7 +11,7 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'python-app'
+  - job_name: 'album-manager-app'
     kubernetes_sd_configs:
       - role: pod
     relabel_configs:
