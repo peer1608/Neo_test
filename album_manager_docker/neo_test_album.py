@@ -161,9 +161,11 @@ def delete():
         message = [{"Exit Code": "500", "Content": "Image Name not given"}]
         return jsonify(message)
 
+# A route to view given images in given album.
 @app.route('/api/v1/resources/view')
 @INDEX_TIME.time()
 def send_image():
+    print request.method
     counter()
     if 'imageName' in request.args:
         albumName, image = request.args['imageName'].split(':')
@@ -178,6 +180,7 @@ def send_image():
         message = [{"Exit Code": "500", "Content": "Image file not given"}]
         return jsonify(message)
 
+# A route to display events/requests handled.
 @app.route('/api/v1/resources/events')
 @INDEX_TIME.time()
 def events():
@@ -192,20 +195,22 @@ def after_request(response):
     """ Logging after every request. """
     # This avoids the duplication of registry in the log,
     # since that 500 is already logged via @app.errorhandler.
-    if 'view' not in request.full_path:
-        if 'events' not in request.full_path and 'view' not in request.full_path:
-            response_data = response.get_data()
-        if 'events' in request.full_path:
-            response_data='Displaying events'
-        if response.status_code != 500:
-            ts = strftime('[%Y-%b-%d %H:%M]')
-            logger.error('\n%s \n %s %s %s %s %s \n%s',
-                          ts,
-                          request.remote_addr,
-                          request.method,
-                          request.scheme,
-                          request.full_path,
-                          response.status, response_data)
+    if 'view' in request.full_path:
+        response_data='Displaying image'
+        print response_data
+    if 'events' not in request.full_path and 'view' not in request.full_path:
+        response_data = response.get_data()
+    if 'events' in request.full_path:
+        response_data='Displaying events'
+    if response.status_code != 500:
+        ts = strftime('[%Y-%b-%d %H:%M]')
+        logger.error('\n%s \n %s %s %s %s %s \n%s',
+                      ts,
+                      request.remote_addr,
+                      request.method,
+                      request.scheme,
+                      request.full_path,
+                      response.status, response_data)
     return response
 
 @app.errorhandler(Exception)
