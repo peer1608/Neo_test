@@ -6,7 +6,7 @@ import threading
 from BaseHTTPServer import HTTPServer
 from prometheus_client import Summary, MetricsHandler, Counter, generate_latest
 import flask
-from flask import request, jsonify, Response, send_file
+from flask import request, jsonify, Response, send_file, redirect, url_for
 import os
 import logging
 
@@ -16,13 +16,13 @@ folder_name='app-data/images'
 app.config['UPLOAD_FOLDER'] = folder_name
 PROMETHEUS_PORT = 9000
 CONTENT_TYPE_LATEST = str('text/plain; version=0.0.4; charset=utf-8')
-trace_log_path='app-data/trace.log'
+trace_log_path='trace.log'
 
 # Create a metric to track time spent and requests made.
 REQUEST_TIME = Summary('request_processing_seconds', 'DESC: Time spent processing request')
 INDEX_TIME = Summary('index_request_processing_seconds', 'DESC: INDEX time spent processing request')
 
-# Create a metric to cound the number of runs on process_request()
+# Create a metric to count the number of runs on process_request()
 c = Counter('requests_for_host', 'Number of runs of the process_request method', ['method', 'endpoint'])
 
 def counter():
@@ -31,6 +31,11 @@ def counter():
     label_dict = {"method": verb,
                  "endpoint": path}
     c.labels(**label_dict).inc()
+
+@app.route('/')
+def index():
+    print 'check'
+    return redirect(url_for('home'))
 
 # A route to Upload images to album.
 @app.route('/api/v1/resources/upload', methods=['GET','POST'])
