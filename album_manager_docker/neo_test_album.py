@@ -34,7 +34,6 @@ def counter():
 
 @app.route('/')
 def index():
-    print 'check'
     return redirect(url_for('home'))
 
 # A route to Upload images to album.
