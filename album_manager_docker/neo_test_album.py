@@ -16,7 +16,7 @@ folder_name='app-data/images'
 app.config['UPLOAD_FOLDER'] = folder_name
 PROMETHEUS_PORT = 9000
 CONTENT_TYPE_LATEST = str('text/plain; version=0.0.4; charset=utf-8')
-trace_log_path='trace.log'
+trace_log_path='app-data/trace.log'
 
 # Create a metric to track time spent and requests made.
 REQUEST_TIME = Summary('request_processing_seconds', 'DESC: Time spent processing request')
